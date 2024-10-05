@@ -50,7 +50,7 @@ while True:
     rgb_frame = frame[:, :, ::-1]
     
     # Detect faces in the frame
-    face_locations = face_recognition.face_locations(rgb_frame)
+    face_locations = face_recognition.face_locaions(rgb_frame)
     face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
     
     for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
