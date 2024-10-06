@@ -5,7 +5,7 @@ import os
 
 if __name__ == "__main__":
     
-    # Create git
+    # Create git 
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     # Load the trained model
     recognizer.read('trainer.yml')
