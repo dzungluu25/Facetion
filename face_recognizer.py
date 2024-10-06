@@ -5,7 +5,7 @@ import os
 
 if __name__ == "__main__":
     
-    # Create LBPH Face Recognizer
+    # Create git
     recognizer = cv2.face.LBPHFaceRecognizer_create()
     # Load the trained model
     recognizer.read('trainer.yml')
@@ -50,10 +50,8 @@ if __name__ == "__main__":
         )
     
         for (x, y, w, h) in faces:
-
             # Draw a rectangle around the detected face
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    
             # Recognize the face using the trained model
             id, confidence = recognizer.predict(gray[y:y + h, x:x + w])
             # Proba greater than 51

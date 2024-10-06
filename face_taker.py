@@ -104,13 +104,13 @@ if __name__ == '__main__':
             cv2.imshow('image', img)
     
         # Press Escape to end the program
-        k = cv2.waitKey(100) & 0xff
-        if k < 30:
+        k = cv2.waitKey(200) & 0xff
+        if k <250:
             break
     
         # Take 30 face samples and stop video. You may increase or decrease the number of
         # images. The more, the better while training the model.
-        elif count >= 30:
+        elif count >= 250:
             break
     
     print('\n[INFO] Success! Exiting Program.')
