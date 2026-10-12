@@ -1,5 +1,7 @@
 """Step 3: recognize faces from the webcam in real time."""
 
+from pathlib import Path
+
 import cv2
 
 from facetion import config
@@ -9,17 +11,20 @@ UNKNOWN_LABEL = "Who are you?"
 FONT = cv2.FONT_HERSHEY_SIMPLEX
 
 
-def run_recognition() -> None:
-    if not config.MODEL_FILE.exists():
-        raise SystemExit(
-            f"Model not found at {config.MODEL_FILE}. Run the train step first."
-        )
+def run_recognition(
+    data_dir: Path = config.DEFAULT_DATA_DIR,
+    camera_index: int = config.CAMERA_INDEX,
+    threshold: float = config.CONFIDENCE_THRESHOLD,
+) -> None:
+    model_path = config.model_file(data_dir)
+    if not model_path.exists():
+        raise SystemExit(f"Model not found at {model_path}. Run 'facetion train' first.")
 
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    recognizer.read(str(config.MODEL_FILE))
+    recognizer.read(str(model_path))
     detector = load_face_detector()
-    names = load_names()
-    camera = open_camera()
+    names = load_names(data_dir)
+    camera = open_camera(camera_index)
 
     # Ignore detections smaller than 10% of the frame
     min_size = (int(0.1 * config.FRAME_WIDTH), int(0.1 * config.FRAME_HEIGHT))
@@ -40,7 +45,7 @@ def run_recognition() -> None:
                 user_id, distance = recognizer.predict(gray[y:y + h, x:x + w])
 
                 # LBPH returns a distance: lower means a better match
-                if distance < config.CONFIDENCE_THRESHOLD and str(user_id) in names:
+                if distance < threshold and str(user_id) in names:
                     label = names[str(user_id)]
                     score = f"{round(100 - distance)}%"
                 else:
@@ -58,11 +63,3 @@ def run_recognition() -> None:
         cv2.destroyAllWindows()
 
     print("\n[INFO] Exiting program.")
-
-
-def main() -> None:
-    run_recognition()
-
-
-if __name__ == "__main__":
-    main()

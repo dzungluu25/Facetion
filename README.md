@@ -1,232 +1,158 @@
-# Facetion
+<div align="center">
 
-> Real-time face recognition from your webcam, in three short Python scripts, built on OpenCV.
+# 🙂 Facetion
 
+**Real-time face recognition from your webcam, set up in 3 commands.**
+
+Runs entirely on your own computer. No cloud, no GPU, no account.
+
+[![CI](https://github.com/dzungluu25/Facetion/actions/workflows/ci.yml/badge.svg)](https://github.com/dzungluu25/Facetion/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![OpenCV](https://img.shields.io/badge/OpenCV-contrib-green)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey)
+[![Stars](https://img.shields.io/github/stars/dzungluu25/Facetion?style=social)](https://github.com/dzungluu25/Facetion/stargazers)
 
 ![demo](assets/demo.gif)
 
-Facetion detects faces with a Haar cascade and identifies them with OpenCV's **LBPH** (Local Binary Patterns Histograms) recognizer. You capture face samples, train a model, and run live recognition. All of it runs locally with no cloud services and no GPU.
+</div>
+
+```bash
+pip install git+https://github.com/dzungluu25/Facetion.git
+facetion capture --name Alice     # take 50 photos of a face
+facetion train                    # learn the faces
+facetion recognize                # see names on live video
+```
 
 ---
 
-## Table of Contents
+## ✨ Features
 
-- [Features](#features)
-- [How It Works](#how-it-works)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Project Structure](#project-structure)
-- [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
-- [Known Limitations](#known-limitations)
-- [Contributing](#contributing)
+- ⚡ **Fast:** recognizes faces in real time on an ordinary laptop CPU
+- 🔒 **Private:** photos and models never leave your computer
+- 👥 **Multiple people:** register as many people as you like, and list or remove them with one command
+- 🧰 **Simple CLI:** one `facetion` command with clear options and helpful error messages
+- 🖥️ **Cross-platform:** tested on Windows, macOS and Linux
+- 🐍 **Hackable:** a small, readable codebase that's good for learning computer vision
 
----
+## 📦 Installation
 
-## Features
+You need **Python 3.9+** and a **webcam**.
 
-- 📸 **Face capture:** collects grayscale face samples from your webcam automatically
-- 🧠 **Training:** trains an LBPH model in seconds on a CPU
-- 🎥 **Live recognition:** draws a box, the person's name, and a confidence score on each face
-- 👥 **Multiple users:** register as many people as you like. IDs are assigned automatically and stored in `names.json`
+<details>
+<summary>Don't have Python or Git yet?</summary>
 
-## How It Works
+- **Python:** download it from [python.org/downloads](https://www.python.org/downloads/). On Windows, tick **"Add python.exe to PATH"** during installation.
+- **Git:** download it from [git-scm.com/downloads](https://git-scm.com/downloads). On macOS you can run `xcode-select --install` instead.
 
-```
- capture                train                    recognize
-┌──────────────┐      ┌───────────────┐        ┌──────────────────┐
-│ Webcam →     │      │ data/images/→ │        │ Webcam →         │
-│ detect face →│ ───▶ │ LBPH training │ ─────▶ │ detect + predict │
-│ data/images/ │      │ →trainer.yml  │        │ → name on screen │
-└──────────────┘      └───────────────┘        └──────────────────┘
-        └──── data/names.json (ID → name) ──────────────┘
-```
+Check that they're installed with `python --version` and `git --version`.
+</details>
 
-## Requirements
-
-- Python 3.9 or newer
-- Git (optional: you can download the code as a ZIP instead)
-- A webcam
-- `opencv-contrib-python` (it provides the `cv2.face` module), `numpy`, and `pillow`. These are installed in [step 3](#3-set-up-the-project)
-
-## Installation
-
-### 1. Install Python
-
-Check whether Python is already installed:
+**Option A: install the command (recommended)**
 
 ```bash
-python3 --version    # Windows: python --version
+pip install git+https://github.com/dzungluu25/Facetion.git
 ```
 
-If you see `Python 3.9` or newer, skip to the next step. Otherwise:
-
-| OS | How to install |
-|---|---|
-| **Windows** | Download the installer from [python.org/downloads](https://www.python.org/downloads/). On the first screen, tick **"Add python.exe to PATH"**, then click *Install Now*. |
-| **macOS** | Download the installer from [python.org/downloads](https://www.python.org/downloads/), or with [Homebrew](https://brew.sh/): `brew install python` |
-| **Ubuntu / Debian** | `sudo apt update && sudo apt install python3 python3-pip python3-venv` |
-
-Close and reopen your terminal, then run `python3 --version` (Windows: `python --version`) again to confirm.
-
-### 2. Install Git (optional)
-
-Check whether Git is already installed:
+**Option B: clone the source**
 
 ```bash
-git --version
-```
-
-If it isn't:
-
-| OS | How to install |
-|---|---|
-| **Windows** | Download and run the installer from [git-scm.com/download/win](https://git-scm.com/download/win). The default options are fine. |
-| **macOS** | Run `xcode-select --install`, or `brew install git` |
-| **Ubuntu / Debian** | `sudo apt install git` |
-
-> **No Git?** On the [repository page](https://github.com/dzungluu25/Facetion), click **Code → Download ZIP**, unzip it, and open a terminal in the unzipped folder. Then skip the `git clone` and `cd` lines below.
-
-### 3. Set up the project
-
-**macOS / Linux**
-
-```bash
-# Get the code
 git clone https://github.com/dzungluu25/Facetion.git
 cd Facetion
-
-# Create and activate a virtual environment (keeps dependencies isolated)
-python3 -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-**Windows (Command Prompt or PowerShell)**
-
-```bat
-git clone https://github.com/dzungluu25/Facetion.git
-cd Facetion
-
 python -m venv venv
-venv\Scripts\activate
-
-pip install -r requirements.txt
+source venv/bin/activate          # Windows: venv\Scripts\activate
+pip install -e .
 ```
 
-> If PowerShell blocks `activate` with an "execution policy" error, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then try again.
+## 🚀 Usage
 
-When the virtual environment is active, your prompt starts with `(venv)`. Activate it again each time you open a new terminal before running Facetion.
-
-> ⚠️ Install **only** `opencv-contrib-python`. Having it alongside `opencv-python` can cause `AttributeError: module 'cv2' has no attribute 'face'`. If you get that error, run `pip uninstall opencv-python opencv-contrib-python`, then `pip install opencv-contrib-python`.
-
-## Usage
-
-Run the three steps in order from the project root.
-
-### 1. Capture face samples
+### 1. Register a person
 
 ```bash
-python -m facetion capture
+facetion capture --name Alice
 ```
 
-- Enter a name when prompted and press <kbd>Enter</kbd>.
-- Look at the camera and keep your face centered. Move your head slightly and change your expression to get more varied samples.
-- The script saves **50** face images to `data/images/user-<id>-<n>.jpg` and stops on its own. Press <kbd>Esc</kbd> to stop early.
-- The ID-to-name mapping is written to `data/names.json`.
+Look at the camera and move your head slightly. Facetion takes 50 photos and closes by itself. Repeat this for each person.
 
-Repeat this step for each person you want to recognize.
-
-### 2. Train the model
+### 2. Train
 
 ```bash
-python -m facetion train
+facetion train
 ```
 
-This reads every image in `data/images/`, trains the LBPH recognizer, and saves the model to `data/trainer.yml`.
+Run this again whenever you add or remove someone.
 
-> Re-run training every time you add a new person.
-
-### 3. Run real-time recognition
+### 3. Recognize
 
 ```bash
-python -m facetion recognize
+facetion recognize
 ```
 
-Each recognized face gets a name and a score. Unrecognized faces are labeled **"Who are you?"**. Press <kbd>Esc</kbd> to quit.
+Known faces are labeled with a name and a match score. Unknown faces are labeled **"Who are you?"**. Press <kbd>Esc</kbd> to quit.
 
-## Project Structure
+### Command reference
+
+| Command | What it does |
+|---|---|
+| `facetion capture [--name NAME] [--samples N] [--camera N]` | Register a new person |
+| `facetion train` | Train the model on all captured faces |
+| `facetion recognize [--threshold N] [--camera N]` | Live recognition. A lower threshold is stricter (default `51`) |
+| `facetion users list` | Show registered people and their IDs |
+| `facetion users remove ID` | Delete a person and their photos |
+| `facetion --data-dir DIR …` | Store data somewhere other than `./data` (or set `FACETION_DATA_DIR`) |
+| `facetion --help` | Show all options |
+
+> You can also run `python -m facetion …` instead of `facetion …`.
+
+## 🧠 How it works
 
 ```
-Facetion/
-├── facetion/
-│   ├── __main__.py      # CLI: python -m facetion <capture|train|recognize>
-│   ├── config.py        # Paths and tunable settings
-│   ├── utils.py         # Shared helpers (camera, detector, names.json)
-│   ├── capture.py       # Step 1: capture face images
-│   ├── train.py         # Step 2: train LBPH model
-│   └── recognize.py     # Step 3: live recognition
-├── models/
-│   └── haarcascade_frontalface_default.xml  # Pre-trained Haar face detector
-├── data/
-│   ├── names.json       # ID → name mapping
-│   ├── images/          # (generated, git-ignored) face samples
-│   └── trainer.yml      # (generated, git-ignored) trained model
-├── assets/demo.gif
-├── requirements.txt
-└── README.md
+  capture                  train                    recognize
+┌───────────────┐      ┌────────────────┐       ┌──────────────────┐
+│ Webcam        │      │ Face photos    │       │ Webcam           │
+│ → detect face │ ───▶ │ → LBPH model   │ ────▶ │ → detect face    │
+│ → save photos │      │ → trainer.yml  │       │ → predict name   │
+└───────────────┘      └────────────────┘       └──────────────────┘
 ```
 
-## Configuration
+1. **Detection:** a [Haar cascade](https://docs.opencv.org/4.x/db/d28/tutorial_cascade_classifier.html) finds faces in each frame.
+2. **Recognition:** OpenCV's [LBPH](https://docs.opencv.org/4.x/df/d25/classcv_1_1face_1_1LBPHFaceRecognizer.html) recognizer compares each face with the people you registered and returns the closest match and its distance.
 
-All settings live in [`facetion/config.py`](facetion/config.py):
+Data is stored in `./data` by default:
 
-| Setting | Default | Description |
-|---|---|---|
-| `SAMPLES_PER_USER` | `50` | Face images captured per person. More samples usually improve accuracy |
-| `CAMERA_INDEX` | `0` | Change this if you have several cameras |
-| `FRAME_WIDTH` / `FRAME_HEIGHT` | `640×480` | Camera resolution |
-| `CONFIDENCE_THRESHOLD` | `51` | Max LBPH distance accepted as a match (lower = stricter) |
-
-`data/names.json` example:
-
-```json
-{
-    "0": "Joe",
-    "1": "Jane"
-}
+```
+data/
+├── names.json      # person ID → name
+├── images/         # face photos (user-<id>-<n>.jpg)
+└── trainer.yml     # trained model
 ```
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| `python` / `git` not recognized as a command | Install it (see [Installation](#installation)), then close and reopen the terminal. On Windows, re-run the Python installer and tick **Add python.exe to PATH** |
-| `module 'cv2' has no attribute 'face'` | Install `opencv-contrib-python` (see [Installation](#installation)) |
-| Camera window doesn't open / black frame | Check the camera index, and grant camera permission to your terminal (macOS: *System Settings → Privacy & Security → Camera*) |
-| Model not found | Run `train` before `recognize` |
-| No samples found during training | Run `capture` first |
-| Wrong names shown | Make sure the keys in `data/names.json` match the IDs in `data/images/` file names, then retrain |
+| `facetion: command not found` | Use `python -m facetion …`, or make sure your virtual environment is active |
+| `module 'cv2' has no attribute 'face'` | `pip uninstall -y opencv-python opencv-contrib-python && pip install opencv-contrib-python` |
+| `Could not open camera 0` | Close other apps that use the camera, try `--camera 1`, and on macOS allow camera access for your terminal in **System Settings → Privacy & Security → Camera** |
+| Wrong name, or "Who are you?" for a known person | Use good lighting, capture more photos of that person, and run `facetion train` again. You can also try `--threshold 60` |
 
-## Known Limitations
+## 🗺️ Roadmap
 
-- Haar cascades work best on frontal, well-lit faces.
-- LBPH is a classical algorithm. For higher accuracy, consider deep-learning embeddings (e.g. `face_recognition`, InsightFace).
+- [ ] Recognize faces in image and video files, not just the webcam
+- [ ] Deep-learning backend (OpenCV YuNet + SFace) for better accuracy
+- [ ] Simple desktop GUI
+- [ ] Publish to PyPI (`pip install facetion`)
+- [ ] Attendance mode: log who was seen and when, to CSV
 
-## Contributing
+Have an idea? [Open an issue](https://github.com/dzungluu25/Facetion/issues/new/choose).
 
-Contributions are welcome:
+## 🤝 Contributing
 
-1. Fork the repo
-2. Create a branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -m "Add my feature"`
-4. Push and open a Pull Request
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, tests, and guidelines. Items on the roadmap are a good place to start.
 
-## Acknowledgements
+## ⭐ Support
+
+If Facetion is useful to you, please **give it a star**. It helps other people find the project.
+
+## 🙏 Acknowledgements
 
 - [OpenCV](https://opencv.org/) for the Haar cascade and LBPH face recognizer

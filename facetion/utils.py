@@ -8,16 +8,18 @@ import cv2
 from facetion import config
 
 
-def load_names(path: Path = config.NAMES_FILE) -> dict[str, str]:
+def load_names(data_dir: Path) -> dict[str, str]:
     """Return the ID -> name mapping, or an empty dict if none exists yet."""
+    path = config.names_file(data_dir)
     if not path.exists():
         return {}
     with path.open(encoding="utf-8") as f:
         return json.load(f)
 
 
-def save_names(names: dict[str, str], path: Path = config.NAMES_FILE) -> None:
+def save_names(names: dict[str, str], data_dir: Path) -> None:
     """Write the ID -> name mapping to disk."""
+    path = config.names_file(data_dir)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(names, f, ensure_ascii=False, indent=4)
@@ -35,10 +37,13 @@ def load_face_detector() -> cv2.CascadeClassifier:
     return detector
 
 
-def open_camera() -> cv2.VideoCapture:
-    camera = cv2.VideoCapture(config.CAMERA_INDEX)
+def open_camera(index: int = config.CAMERA_INDEX) -> cv2.VideoCapture:
+    camera = cv2.VideoCapture(index)
     if not camera.isOpened():
-        raise RuntimeError(f"Could not open camera {config.CAMERA_INDEX}")
+        raise SystemExit(
+            f"Could not open camera {index}. Check that it is connected and "
+            "that your terminal has camera permission."
+        )
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, config.FRAME_WIDTH)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, config.FRAME_HEIGHT)
     return camera

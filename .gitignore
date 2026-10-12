@@ -6,3 +6,8 @@ venv/
 # Generated data (personal face images and trained model)
 data/images/
 data/trainer.yml
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/

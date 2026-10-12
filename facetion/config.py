@@ -1,15 +1,14 @@
-"""Shared paths and tunable settings."""
+"""Default paths and tunable settings."""
 
+import os
 from pathlib import Path
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT_DIR / "data"
-IMAGES_DIR = DATA_DIR / "images"
-NAMES_FILE = DATA_DIR / "names.json"
-MODEL_FILE = DATA_DIR / "trainer.yml"
+PACKAGE_DIR = Path(__file__).resolve().parent
+CASCADE_FILE = PACKAGE_DIR / "models" / "haarcascade_frontalface_default.xml"
 
-MODELS_DIR = ROOT_DIR / "models"
-CASCADE_FILE = MODELS_DIR / "haarcascade_frontalface_default.xml"
+# Where face images, names and the trained model are stored.
+# Override with the FACETION_DATA_DIR environment variable or --data-dir.
+DEFAULT_DATA_DIR = Path(os.environ.get("FACETION_DATA_DIR", "data"))
 
 CAMERA_INDEX = 0
 FRAME_WIDTH = 640
@@ -21,3 +20,15 @@ SAMPLES_PER_USER = 50
 CONFIDENCE_THRESHOLD = 51
 
 ESC_KEY = 27
+
+
+def images_dir(data_dir: Path) -> Path:
+    return data_dir / "images"
+
+
+def names_file(data_dir: Path) -> Path:
+    return data_dir / "names.json"
+
+
+def model_file(data_dir: Path) -> Path:
+    return data_dir / "trainer.yml"
