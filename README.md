@@ -23,11 +23,15 @@ facetion train                    # learn the faces
 facetion recognize                # see names on live video
 ```
 
+Want better accuracy? Add `--backend dnn` to `train` and `recognize` to use deep-learning models.
+
 ---
 
 ## ✨ Features
 
 - ⚡ **Fast:** recognizes faces in real time on an ordinary laptop CPU
+- 🎯 **Two engines:** a classic LBPH model with nothing to download, or deep-learning models (YuNet + SFace) for much higher accuracy
+- 🖼️ **Webcam, photos and videos:** recognize faces live, or in an image or video file, and save the labeled result
 - 🔒 **Private:** photos and models never leave your computer
 - 👥 **Multiple people:** register as many people as you like, and list or remove them with one command
 - 🧰 **Simple CLI:** one `facetion` command with clear options and helpful error messages
@@ -87,15 +91,41 @@ Run this again whenever you add or remove someone.
 facetion recognize
 ```
 
-Known faces are labeled with a name and a match score. Unknown faces are labeled **"Who are you?"**. Press <kbd>Esc</kbd> to quit.
+Known faces get a green box with a name and a match score. Unknown faces get a red **"Who are you?"** box. Press <kbd>Esc</kbd> to quit.
+
+### Photos and videos
+
+```bash
+facetion recognize group-photo.jpg                     # show the result in a window
+facetion recognize party.mp4 -o party-labeled.mp4      # save a labeled copy of a video
+facetion recognize photo.jpg -o out.jpg --no-show      # save the result without opening a window
+```
+
+### Better accuracy with deep learning
+
+```bash
+facetion train --backend dnn
+facetion recognize --backend dnn
+```
+
+The `dnn` backend uses OpenCV's [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) face detector and [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) face recognizer. The models (about 40 MB) download automatically the first time and are cached in `~/.cache/facetion`.
+
+| | `lbph` (default) | `dnn` |
+|---|---|---|
+| Accuracy | Good in steady lighting | Much better with different lighting, angles and expressions |
+| Speed | Very fast | Real time on most laptops |
+| Download | None | ~40 MB, one time |
+| Photos needed per person | ~50 | Works with just a few |
 
 ### Command reference
 
 | Command | What it does |
 |---|---|
 | `facetion capture [--name NAME] [--samples N] [--camera N]` | Register a new person |
-| `facetion train` | Train the model on all captured faces |
-| `facetion recognize [--threshold N] [--camera N]` | Live recognition. A lower threshold is stricter (default `51`) |
+| `facetion train [--backend lbph\|dnn]` | Train the model on all captured faces |
+| `facetion recognize [FILE] [--backend lbph\|dnn] [-o OUT] [--no-show]` | Recognize faces from the webcam, or from an image or video file |
+| `facetion recognize … --threshold N` | Match strictness. For `lbph`, lower is stricter (default `51`). For `dnn`, higher is stricter (default `0.363`) |
+| `facetion recognize … --camera N` | Use a different camera |
 | `facetion users list` | Show registered people and their IDs |
 | `facetion users remove ID` | Delete a person and their photos |
 | `facetion --data-dir DIR …` | Store data somewhere other than `./data` (or set `FACETION_DATA_DIR`) |
@@ -114,8 +144,10 @@ Known faces are labeled with a name and a match score. Unknown faces are labeled
 └───────────────┘      └────────────────┘       └──────────────────┘
 ```
 
-1. **Detection:** a [Haar cascade](https://docs.opencv.org/4.x/db/d28/tutorial_cascade_classifier.html) finds faces in each frame.
-2. **Recognition:** OpenCV's [LBPH](https://docs.opencv.org/4.x/df/d25/classcv_1_1face_1_1LBPHFaceRecognizer.html) recognizer compares each face with the people you registered and returns the closest match and its distance.
+| Step | `lbph` backend | `dnn` backend |
+|---|---|---|
+| Find faces | [Haar cascade](https://docs.opencv.org/4.x/db/d28/tutorial_cascade_classifier.html) | [YuNet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) neural network |
+| Identify faces | [LBPH](https://docs.opencv.org/4.x/df/d25/classcv_1_1face_1_1LBPHFaceRecognizer.html) texture histograms, closest distance | [SFace](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) 128-number face embeddings, cosine similarity |
 
 Data is stored in `./data` by default:
 
@@ -123,7 +155,8 @@ Data is stored in `./data` by default:
 data/
 ├── names.json      # person ID → name
 ├── images/         # face photos (user-<id>-<n>.jpg)
-└── trainer.yml     # trained model
+├── trainer.yml     # trained lbph model
+└── embeddings.npz  # trained dnn model
 ```
 
 ## 🛠️ Troubleshooting
@@ -133,12 +166,14 @@ data/
 | `facetion: command not found` | Use `python -m facetion …`, or make sure your virtual environment is active |
 | `module 'cv2' has no attribute 'face'` | `pip uninstall -y opencv-python opencv-contrib-python && pip install opencv-contrib-python` |
 | `Could not open camera 0` | Close other apps that use the camera, try `--camera 1`, and on macOS allow camera access for your terminal in **System Settings → Privacy & Security → Camera** |
-| Wrong name, or "Who are you?" for a known person | Use good lighting, capture more photos of that person, and run `facetion train` again. You can also try `--threshold 60` |
+| Wrong name, or "Who are you?" for a known person | Try `--backend dnn`. Otherwise, use good lighting, capture more photos of that person, and run `facetion train` again |
+| `No trained dnn model` | Run `facetion train --backend dnn` (each backend is trained separately) |
+| Model download fails | Check your internet connection and retry. You can set `FACETION_MODELS_DIR` to choose where models are stored |
 
 ## 🗺️ Roadmap
 
-- [ ] Recognize faces in image and video files, not just the webcam
-- [ ] Deep-learning backend (OpenCV YuNet + SFace) for better accuracy
+- [x] Recognize faces in image and video files, not just the webcam
+- [x] Deep-learning backend (OpenCV YuNet + SFace) for better accuracy
 - [ ] Simple desktop GUI
 - [ ] Publish to PyPI (`pip install facetion`)
 - [ ] Attendance mode: log who was seen and when, to CSV
@@ -156,3 +191,4 @@ If Facetion is useful to you, please **give it a star**. It helps other people f
 ## 🙏 Acknowledgements
 
 - [OpenCV](https://opencv.org/) for the Haar cascade and LBPH face recognizer
+- [OpenCV Zoo](https://github.com/opencv/opencv_zoo) for the YuNet (MIT) and SFace (Apache 2.0) models

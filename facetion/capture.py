@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import cv2
+import numpy as np
 
 from facetion import config
 from facetion.utils import load_face_detector, load_names, open_camera, save_names
@@ -15,6 +16,17 @@ def next_user_id(names: dict[str, str]) -> int:
     while user_id in used:
         user_id += 1
     return user_id
+
+
+def padded_crop(frame: np.ndarray, box, padding: float = config.CROP_PADDING) -> np.ndarray:
+    """Crop a face with a margin around it, clipped to the frame."""
+    x, y, w, h = box
+    pad_x, pad_y = int(w * padding), int(h * padding)
+    height, width = frame.shape[:2]
+    return frame[
+        max(0, y - pad_y):min(height, y + h + pad_y),
+        max(0, x - pad_x):min(width, x + w + pad_x),
+    ]
 
 
 def capture_faces(
@@ -46,12 +58,14 @@ def capture_faces(
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
 
-            for x, y, w, h in faces:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # Save before drawing so the rectangle doesn't end up in the sample
+            for box in faces:
                 count += 1
                 image_path = images_dir / f"user-{user_id}-{count}.jpg"
-                cv2.imwrite(str(image_path), gray[y:y + h, x:x + w])
+                cv2.imwrite(str(image_path), padded_crop(frame, box))
 
+            for x, y, w, h in faces:
+                cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
             cv2.putText(
                 frame, f"{count}/{samples}", (10, 30),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2,

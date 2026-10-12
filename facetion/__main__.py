@@ -6,6 +6,7 @@ import argparse
 from pathlib import Path
 
 from facetion import __version__, config
+from facetion.backends import BACKENDS
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -26,13 +27,28 @@ def build_parser() -> argparse.ArgumentParser:
     capture.add_argument("--camera", type=int, default=config.CAMERA_INDEX,
                          help="camera index (default: %(default)s)")
 
-    subparsers.add_parser("train", help="train the model on captured faces")
+    backend_help = "lbph = fast classic model, dnn = more accurate deep-learning model"
 
-    recognize = subparsers.add_parser("recognize", help="recognize faces live")
+    train = subparsers.add_parser("train", help="train the model on captured faces")
+    train.add_argument("--backend", choices=BACKENDS, default=config.DEFAULT_BACKEND,
+                       help=f"{backend_help} (default: %(default)s)")
+
+    recognize = subparsers.add_parser(
+        "recognize", help="recognize faces from the webcam, an image or a video"
+    )
+    recognize.add_argument("source", nargs="?",
+                           help="image or video file (default: use the webcam)")
+    recognize.add_argument("--backend", choices=BACKENDS, default=config.DEFAULT_BACKEND,
+                           help=f"{backend_help} (default: %(default)s)")
     recognize.add_argument("--camera", type=int, default=config.CAMERA_INDEX,
                            help="camera index (default: %(default)s)")
-    recognize.add_argument("--threshold", type=float, default=config.CONFIDENCE_THRESHOLD,
-                           help="max match distance, lower is stricter (default: %(default)s)")
+    recognize.add_argument("--threshold", type=float,
+                           help="match threshold (default: 51 for lbph, lower is stricter; "
+                                "0.363 for dnn, higher is stricter)")
+    recognize.add_argument("--output", "-o", type=Path,
+                           help="save the annotated image or video to this file")
+    recognize.add_argument("--no-show", action="store_true",
+                           help="don't open a window (useful with --output)")
 
     users = subparsers.add_parser("users", help="list or remove registered people")
     users_sub = users.add_subparsers(dest="users_command", required=True)
@@ -57,12 +73,15 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "train":
         from facetion.train import train_model
 
-        train_model(args.data_dir)
+        train_model(args.data_dir, args.backend)
 
     elif args.command == "recognize":
         from facetion.recognize import run_recognition
 
-        run_recognition(args.data_dir, args.camera, args.threshold)
+        run_recognition(
+            args.data_dir, args.backend, args.source, args.camera, args.threshold,
+            args.output, show=not args.no_show,
+        )
 
     elif args.command == "users":
         from facetion.users import list_users, remove_user
