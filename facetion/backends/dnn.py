@@ -10,10 +10,6 @@ import numpy as np
 from facetion.backends.base import Backend, Match, iter_samples, no_samples_exit
 from facetion.model_zoo import ensure_model
 
-# Hide OpenCV's harmless DNN target warnings
-if hasattr(cv2, "utils") and hasattr(cv2.utils, "logging"):
-    cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
-
 # YuNet works poorly on tiny inputs, so small samples are upscaled first
 _MIN_DETECT_SIZE = 320
 

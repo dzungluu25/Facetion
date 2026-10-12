@@ -11,7 +11,8 @@ from facetion.backends import BACKENDS
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="facetion", description="Real-time face recognition with OpenCV."
+        prog="facetion",
+        description="Face recognition and hand-gesture computer control with OpenCV.",
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument(
@@ -50,6 +51,23 @@ def build_parser() -> argparse.ArgumentParser:
     recognize.add_argument("--no-show", action="store_true",
                            help="don't open a window (useful with --output)")
 
+    control = subparsers.add_parser(
+        "control", help="control the mouse with hand gestures (needs facetion[control])"
+    )
+    control.add_argument("--camera", type=int, default=config.CAMERA_INDEX,
+                         help="camera index (default: %(default)s)")
+    control.add_argument("--owner", metavar="NAME",
+                         help="only allow control while this registered person is in view")
+    control.add_argument("--backend", choices=BACKENDS, default=config.DEFAULT_BACKEND,
+                         help="face backend used by --owner (default: %(default)s)")
+    control.add_argument("--smoothing", type=float, default=0.35,
+                         help="cursor smoothing, 0.1 = very smooth, 1 = raw (default: %(default)s)")
+    control.add_argument("--margin", type=float, default=0.15,
+                         help="ignored border of the camera image, so screen corners are "
+                              "easy to reach (default: %(default)s)")
+    control.add_argument("--dry-run", action="store_true",
+                         help="show detected gestures without moving the mouse")
+
     users = subparsers.add_parser("users", help="list or remove registered people")
     users_sub = users.add_subparsers(dest="users_command", required=True)
     users_sub.add_parser("list", help="list registered people")
@@ -81,6 +99,16 @@ def main(argv: list[str] | None = None) -> None:
         run_recognition(
             args.data_dir, args.backend, args.source, args.camera, args.threshold,
             args.output, show=not args.no_show,
+        )
+
+    elif args.command == "control":
+        from facetion.control.app import run_control
+        from facetion.control.controller import ControlSettings
+
+        run_control(
+            args.camera, args.owner, args.data_dir, args.backend,
+            ControlSettings(smoothing=args.smoothing, margin=args.margin),
+            dry_run=args.dry_run,
         )
 
     elif args.command == "users":
