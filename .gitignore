@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Generated data (personal face images and trained model)
+data/images/
+data/trainer.yml
