@@ -2,7 +2,7 @@
 
 > Real-time face recognition from your webcam, in three short Python scripts, built on OpenCV.
 
-![Python](https://img.shields.io/badge/python-3.8%2B-blue)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![OpenCV](https://img.shields.io/badge/OpenCV-contrib-green)
 
 ![demo](assets/demo.gif)
@@ -47,24 +47,81 @@ Facetion detects faces with a Haar cascade and identifies them with OpenCV's **L
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.9 or newer
+- Git (optional: you can download the code as a ZIP instead)
 - A webcam
-- `opencv-contrib-python` (it provides the `cv2.face` module), `numpy`, and `pillow`
+- `opencv-contrib-python` (it provides the `cv2.face` module), `numpy`, and `pillow`. These are installed in [step 3](#3-set-up-the-project)
 
 ## Installation
 
+### 1. Install Python
+
+Check whether Python is already installed:
+
 ```bash
-# 1. Clone the repository
+python3 --version    # Windows: python --version
+```
+
+If you see `Python 3.9` or newer, skip to the next step. Otherwise:
+
+| OS | How to install |
+|---|---|
+| **Windows** | Download the installer from [python.org/downloads](https://www.python.org/downloads/). On the first screen, tick **"Add python.exe to PATH"**, then click *Install Now*. |
+| **macOS** | Download the installer from [python.org/downloads](https://www.python.org/downloads/), or with [Homebrew](https://brew.sh/): `brew install python` |
+| **Ubuntu / Debian** | `sudo apt update && sudo apt install python3 python3-pip python3-venv` |
+
+Close and reopen your terminal, then run `python3 --version` (Windows: `python --version`) again to confirm.
+
+### 2. Install Git (optional)
+
+Check whether Git is already installed:
+
+```bash
+git --version
+```
+
+If it isn't:
+
+| OS | How to install |
+|---|---|
+| **Windows** | Download and run the installer from [git-scm.com/download/win](https://git-scm.com/download/win). The default options are fine. |
+| **macOS** | Run `xcode-select --install`, or `brew install git` |
+| **Ubuntu / Debian** | `sudo apt install git` |
+
+> **No Git?** On the [repository page](https://github.com/dzungluu25/Facetion), click **Code → Download ZIP**, unzip it, and open a terminal in the unzipped folder. Then skip the `git clone` and `cd` lines below.
+
+### 3. Set up the project
+
+**macOS / Linux**
+
+```bash
+# Get the code
 git clone https://github.com/dzungluu25/Facetion.git
 cd Facetion
 
-# 2. (Recommended) Create a virtual environment
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+# Create and activate a virtual environment (keeps dependencies isolated)
+python3 -m venv venv
+source venv/bin/activate
 
-# 3. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 ```
+
+**Windows (Command Prompt or PowerShell)**
+
+```bat
+git clone https://github.com/dzungluu25/Facetion.git
+cd Facetion
+
+python -m venv venv
+venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+> If PowerShell blocks `activate` with an "execution policy" error, run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then try again.
+
+When the virtual environment is active, your prompt starts with `(venv)`. Activate it again each time you open a new terminal before running Facetion.
 
 > ⚠️ Install **only** `opencv-contrib-python`. Having it alongside `opencv-python` can cause `AttributeError: module 'cv2' has no attribute 'face'`. If you get that error, run `pip uninstall opencv-python opencv-contrib-python`, then `pip install opencv-contrib-python`.
 
@@ -149,6 +206,7 @@ All settings live in [`facetion/config.py`](facetion/config.py):
 
 | Problem | Fix |
 |---|---|
+| `python` / `git` not recognized as a command | Install it (see [Installation](#installation)), then close and reopen the terminal. On Windows, re-run the Python installer and tick **Add python.exe to PATH** |
 | `module 'cv2' has no attribute 'face'` | Install `opencv-contrib-python` (see [Installation](#installation)) |
 | Camera window doesn't open / black frame | Check the camera index, and grant camera permission to your terminal (macOS: *System Settings → Privacy & Security → Camera*) |
 | Model not found | Run `train` before `recognize` |
